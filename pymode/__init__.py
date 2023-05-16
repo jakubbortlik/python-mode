@@ -6,7 +6,7 @@ from importlib.machinery import PathFinder as _PathFinder
 
 import vim  # noqa
 
-class_regex = re.compile(r"(?<=No Python documentation found.*Use help\()([^)]+)(?=\))")
+class_regex = re.compile(r"(?:No Python documentation found.*Use help\()([^)]+)(?=\))")
 
 if not hasattr(vim, 'find_module'):
     vim.find_module = _PathFinder.find_module
@@ -47,6 +47,6 @@ def get_documentation(word):
     sys.stdout, out = _, sys.stdout.getvalue()
     alternative_word = class_regex.search(out)
     if alternative_word:
-        get_documentation(alternative_word.group(0))
+        get_documentation(alternative_word.group(1))
     else:
         vim.current.buffer.append(str(out).splitlines(), 0)
