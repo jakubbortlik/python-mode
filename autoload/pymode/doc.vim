@@ -14,7 +14,13 @@ fun! pymode#doc#find() "{{{
     let l:line = getline(".")
     let l:pre = l:line[:col(".") - 1]
     let l:suf = l:line[col("."):]
-    let word = matchstr(pre, "[A-Za-z0-9_.]*$") . matchstr(suf, "^[A-Za-z0-9_]*")
+    if l:line =~ 'from\|import'
+        let word = substitute(l:pre, 'from\s\+\([A-Za-z0-9_.]*\)\s*import\s*', '\1.', 'g'). matchstr(suf, "^[A-Za-z0-9_]*")
+        let word = substitute(l:word, 'from\>\|\<as\>.*$\|import\>\s*', '', 'g')
+    else
+        let word = matchstr(pre, "[A-Za-z0-9_.]*$") . matchstr(suf, "^[A-Za-z0-9_]*")
+    endif
+    let word = substitute(l:word, '^[_.]\|[_.]$', '', 'g')
     call pymode#doc#show(word)
 endfunction "}}}
 
@@ -25,7 +31,7 @@ fun! pymode#doc#show(word) "{{{
     endif
 
     call pymode#tempbuffer_open('__doc__')
-    PymodePython pymode.get_documentation()
+    PymodePython pymode.get_documentation(vim.eval('a:word'))
     setlocal nomodifiable
     setlocal nomodified
     setlocal filetype=rst

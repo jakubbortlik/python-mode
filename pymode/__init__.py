@@ -1,9 +1,12 @@
 """Pymode support functions."""
 
+import re
 import sys
 from importlib.machinery import PathFinder as _PathFinder
 
 import vim  # noqa
+
+class_regex = re.compile(r"(?<=No Python documentation found.*Use help\()([^)]+)(?=\))")
 
 if not hasattr(vim, 'find_module'):
     vim.find_module = _PathFinder.find_module
@@ -35,11 +38,15 @@ def auto():
     fix_file(vim.current.buffer.name, Options)
 
 
-def get_documentation():
+def get_documentation(word):
     """Search documentation and append to current buffer."""
     from io import StringIO
 
     sys.stdout, _ = StringIO(), sys.stdout
-    help(vim.eval('a:word'))
+    help(word)
     sys.stdout, out = _, sys.stdout.getvalue()
-    vim.current.buffer.append(str(out).splitlines(), 0)
+    alternative_word = class_regex.search(out)
+    if alternative_word:
+        get_documentation(alternative_word.group(0))
+    else:
+        vim.current.buffer.append(str(out).splitlines(), 0)
