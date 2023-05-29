@@ -6,7 +6,9 @@ from importlib.machinery import PathFinder as _PathFinder
 
 import vim  # noqa
 
-class_regex = re.compile(r"(?:No Python documentation found.*Use help\()([^)]+)(?=\))")
+class_regex = re.compile(
+    r"(?:No Python documentation found.*Use help\()([^)]+)(?=\))", re.DOTALL
+)
 
 if not hasattr(vim, 'find_module'):
     vim.find_module = _PathFinder.find_module
